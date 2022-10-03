@@ -6,6 +6,7 @@ import random
 import math
 import re
 import time
+import json
 import numpy as np
 import tensorflow as tf
 import matplotlib
@@ -24,6 +25,7 @@ ROOT_DIR = os.path.abspath("../")
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 MODEL_WEIGHTS_PATH = ROOT_DIR +"/daño_mask_rcnn_coco.h5"
 
+#-----------------------------------------------------------------------------------------------------------------
 # Cargamos nuestro conjunto de datos en variables
 config = daño.CustomConfig()
 DAÑO_DIR = "/content/Deteccion-Automatica-Pinturas"
@@ -39,6 +41,7 @@ dataset_train.load_custom(DAÑO_DIR, "train")
 dataset_train.prepare()
 print("Images train: {}\nClasses: {}".format(len(dataset_train.image_ids), dataset_train.class_names))
 
+#-----------------------------------------------------------------------------------------------------------------
 # cambios para la inferencia.
 class InferenceConfig(config.__class__):
     # Run detection on one image at a time
@@ -49,14 +52,17 @@ class InferenceConfig(config.__class__):
 config = InferenceConfig()
 config.display()
 
+#-----------------------------------------------------------------------------------------------------------------
 # Cambiamos el dispositivo objetivo
 DEVICE = "/gpu:0"  # /cpu:0 or /gpu:0
 
+#-----------------------------------------------------------------------------------------------------------------
 #Creamos el modelo de inferencia para las pruebas
 with tf.device(DEVICE):
     model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR,
                               config=config)
 
+#-----------------------------------------------------------------------------------------------------------------
 #Sprint 1 : Prueba: Mostrar por pantalla algunos cuadros con los daños obtenidos para ver el conjunto de datos que he recogido.
 def Sprint1():
   # Cogemos dos ids de imágenes de la carpeta train y dos de la carpeta val
@@ -107,9 +113,8 @@ def Sprint1():
       else:
         cambio = 1 
 
-
+#-----------------------------------------------------------------------------------------------------------------
 #Sprint 2 : Prueba : Validación del algoritmo con el primer entrenamiento realizado.
-
 def Sprint2(cuadro):
   # Cargamos el peso
   weights_path = "/content/mask_rcnn_daño_0010.h5"
@@ -142,7 +147,7 @@ def Sprint2(cuadro):
   log("gt_bbox", gt_bbox)
   log("gt_mask", gt_mask)
 
-import json
+#-----------------------------------------------------------------------------------------------------------------
 with open('/content/Deteccion-Automatica-Pinturas/train/via_region_data.json') as file:
     data = json.load(file)
 
@@ -157,7 +162,8 @@ def Daños_cogidos(nombre_cuadro):
         daños+=1
   
   return daños
-
+  
+#-----------------------------------------------------------------------------------------------------------------
 # Sprint 3: Prueba : Comparamos el número de daños obtenidos con el entrenamiento y el número de daños que hemos recogido de un cuadro dado,
 # si se obtiene el 90% del número de daños que hemos recogido el algoritmo está bien.
 def Sprint3(cuadro):
@@ -225,19 +231,40 @@ def Sprint3(cuadro):
   else:
     print("Buen entrenamiento!!!")
 
-# Comprobamos los argumentos y dependiendo de cual ponemos ejecutamos uno o otro sprint
-script, sprint, cuadro = argv
-if sprint == 'sprint1':
-  Sprint1()
+############################################################
+#  Sprines
+############################################################
+if __name__ == '__main__':
+    import argparse
 
-elif sprint == 'sprint2':
-  Sprint2(cuadro)
+    # Argumentos de la linea de comandos
+    parser = argparse.ArgumentParser(
+        description='Elección de pruebas que se desea realizar')
+    parser.add_argument("command",
+                        metavar="<command>",
+                        help="'sprint1' or 'sprint2' or 'sprint3'")
+    parser.add_argument('--cuadro', required=False,
+                        #metavar="/path/to/custom/dataset/",
+                        help='Nombre del cuadro que se quiere')
+    args = parser.parse_args()
 
-elif sprint == 'sprint3':
-  Sprint3(cuadro)
+    # Validando argumentos
+    if args.command == "sprint2":
+        assert args.cuadro,"Argumento --cuadro es requerido para ejecutar este sprint"
+    elif args.command == "sprint3":
+        assert args.cuadro,"Argumento --cuadro es requerido para ejecutar este sprint"
 
-else:
-  print("Con estos arguemntos no se puede ejecutar el programa")
+    print("Sprint: ", args.command)
+    print("Dataset: ", args.cuadro)
+
+    #Realización de los sprines
+    if args.command == "sprint1":
+      Sprint1()
+    elif args.command == "sprint2":
+      Sprint2(args.cuadro)
+    elif args.command == "sprint3":
+      Sprint3(args.cuadro)
+
 
 
 
