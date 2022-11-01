@@ -19,6 +19,7 @@ from mrcnn.visualize import display_images
 import mrcnn.model as modellib
 from mrcnn.model import log
 import daño
+import miVisualize
 from sys import argv
 
 ROOT_DIR = os.path.abspath("../")
@@ -64,7 +65,7 @@ with tf.device(DEVICE):
 
 #-----------------------------------------------------------------------------------------------------------------
 #Sprint 1 : Prueba: Mostrar por pantalla algunos cuadros con los daños obtenidos para ver el conjunto de datos que he recogido.
-def Sprint1():
+def Sprint1(ruta):
   # Cogemos dos ids de imágenes de la carpeta train y dos de la carpeta val
   image_ids = np.random.choice(dataset.image_ids, 2)
   x = np.random.choice(dataset_train.image_ids,2)
@@ -88,7 +89,9 @@ def Sprint1():
       log("class_ids", class_ids)
       log("bbox", bbox)
       # Display image and instances
-      visualize.display_instances(image, bbox, mask, class_ids, dataset.class_names, figsize=(10,10))
+      nombre_cuadro = str(image_id) + "_train.jpg"
+      miVisualize.saveImage(ruta, nombre_cuadro, image, bbox, mask, class_ids, dataset_train.class_names,
+                       figsize=(10,10))
       aux += 1
 
     else:      
@@ -104,7 +107,9 @@ def Sprint1():
       log("class_ids", class_ids)
       log("bbox", bbox)
       # Display image and instances
-      visualize.display_instances(image, bbox, mask, class_ids, dataset_train.class_names, figsize=(10,10))
+      nombre_cuadro = str(image_id) + "_value.jpg"
+      miVisualize.saveImage(ruta, nombre_cuadro, image, bbox, mask, class_ids, dataset_train.class_names,
+                       figsize=(10,10))
       aux += 1
 
     if aux == 2:
@@ -115,7 +120,7 @@ def Sprint1():
 
 #-----------------------------------------------------------------------------------------------------------------
 #Sprint 2 : Prueba : Validación del algoritmo con el primer entrenamiento realizado.
-def Sprint2(cuadro):
+def Sprint2(ruta,cuadro):
   # Cargamos el peso
   weights_path = "/content/mask_rcnn_daño_0010.h5"
   print("Loading weights ", weights_path)
@@ -140,9 +145,10 @@ def Sprint2(cuadro):
 
   # Display results
   r = results[0]
-  visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], 
-                              dataset_train.class_names, r['scores'],
-                              title="Predictions", figsize=(10,10))
+  miVisualize.saveImage(ruta, "primer_entreno.jpg", image, r['rois'], r['masks'], r['class_ids'], 
+                        dataset_train.class_names,
+                        title="Predicción",figsize=(10,10))
+
   log("gt_class_id", gt_class_id)
   log("gt_bbox", gt_bbox)
   log("gt_mask", gt_mask)
@@ -166,9 +172,9 @@ def Daños_cogidos(nombre_cuadro):
 #-----------------------------------------------------------------------------------------------------------------
 # Sprint 3: Prueba : Comparamos el número de daños obtenidos con el entrenamiento y el número de daños que hemos recogido de un cuadro dado,
 # si se obtiene el 90% del número de daños que hemos recogido el algoritmo está bien.
-def Sprint3(cuadro):
+def Sprint3(ruta,cuadro):
   # Cargamos el peso
-  weights_path = "/content/mask_rcnn_daño_0005 (5).h5"
+  weights_path = "/content/mask_rcnn_daño_0005 (7).h5"
   print("Loading weights ", weights_path)
   model.load_weights(weights_path, by_name=True)
 
@@ -191,7 +197,9 @@ def Sprint3(cuadro):
   log("class_ids", class_ids)
   log("bbox", bbox)
   # Display image and instances
-  visualize.display_instances(image, bbox, mask, class_ids, dataset_train.class_names,figsize=(10,10))
+  #visualize.display_instances(image, bbox, mask, class_ids, dataset_train.class_names,figsize=(10,10))
+  miVisualize.saveImage(ruta, "etiquetado.jpg", image, bbox, mask, class_ids, dataset_train.class_names,
+                       figsize=(10,10))
 
   #Luego mostramos el cuadro con los daños que se detecta con el entrenamiento
   image_paths = []
@@ -205,7 +213,10 @@ def Sprint3(cuadro):
       img_arr = np.array(img)
       results = model.detect([img_arr], verbose=1)
       r = results[0]
-      visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'], 
+      #visualize.display_instances(img, r['rois'], r['masks'], r['class_ids'], 
+                              #dataset_train.class_names,
+                              #title="Predicción",figsize=(10,10))
+      miVisualize.saveImage(ruta, "entrenado.jpg", img, r['rois'], r['masks'], r['class_ids'], 
                               dataset_train.class_names,
                               title="Predicción",figsize=(10,10))
       
@@ -246,6 +257,11 @@ if __name__ == '__main__':
     parser.add_argument('--cuadro', required=False,
                         #metavar="/path/to/custom/dataset/",
                         help='Nombre del cuadro que se quiere')
+
+    parser.add_argument('--path', required=False,
+                        #metavar="/path/to/custom/dataset/",
+                        help='Nombre de la ruta donde se desea guardar')
+
     args = parser.parse_args()
 
     # Validando argumentos
@@ -257,13 +273,18 @@ if __name__ == '__main__':
     print("Sprint: ", args.command)
     print("Dataset: ", args.cuadro)
 
+    ruta = '/content/'
+    if args.path:
+      ruta = args.path
+
+
     #Realización de los sprines
     if args.command == "sprint1":
-      Sprint1()
+      Sprint1(ruta)
     elif args.command == "sprint2":
-      Sprint2(args.cuadro)
+      Sprint2(ruta,args.cuadro)
     elif args.command == "sprint3":
-      Sprint3(args.cuadro)
+      Sprint3(ruta,args.cuadro)
 
 
 
