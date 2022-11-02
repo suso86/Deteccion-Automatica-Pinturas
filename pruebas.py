@@ -93,6 +93,28 @@ def Daños_cogidos(nombre_cuadro):
             daños+=1
   
   return daños
+#-----------------------------------------------------------------------------------------------------------------
+#Cálculo del área de polígonos irregulares
+def AreaPol(coordenadas):
+
+  n = len(coordenadas)
+
+  x= []
+  y= []
+
+  for i in range(n):
+    x.append(float(coordenadas[i][0]))
+    y.append(float(coordenadas[i][1]))
+
+  #Algoritmo para la determinacion del area
+  sum = x[0]*y[n-1] - x[n-1]*y[0]
+
+  for i in range(n-1):
+    sum += x[i+1]*y[i] - x[i]*y[i+1]
+  
+  area = sum/2
+
+  return area
 
 #-----------------------------------------------------------------------------------------------------------------
 #Sprint 1 : Prueba: Mostrar por pantalla algunos cuadros con los daños obtenidos para ver el conjunto de datos que he recogido.
