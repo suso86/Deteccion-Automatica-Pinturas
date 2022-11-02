@@ -144,7 +144,7 @@ def guardarImagenHost(image, boxes, masks, class_ids, class_names,
     #ax.imshow(masked_image.astype(np.uint8))
     plt.savefig(r"C:\Users\jesus\Desktop\cosas_TFG\aplicacion\static\images\deteccion.jpg", bbox_inches='tight')
 
-def duardarImagenColab(image, boxes, masks, class_ids, class_names,
+def guardarImagenColab(image, boxes, masks, class_ids, class_names,
                       scores=None, title="",
                       figsize=(16, 16), ax=None,
                       show_mask=True, show_bbox=True,
@@ -232,7 +232,6 @@ def PoligonosDaños(image, boxes, masks, class_ids, class_names,
                       colors=None, captions=None):
     # Number of instances
     N = boxes.shape[0]
-    print("Vemos cuanto es N:",N)
     if not N:
         print("\n*** No instances to display *** \n")
     else:
@@ -301,8 +300,7 @@ def PoligonosDaños(image, boxes, masks, class_ids, class_names,
             poligonos.append(aux)
             ax.add_patch(p)
             
-        n_poligono += 1
-    print("Numero de poligonos recorridos:", n_poligono)    
+        n_poligono += 1   
     return poligonos
 
 

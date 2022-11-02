@@ -62,6 +62,37 @@ DEVICE = "/gpu:0"  # /cpu:0 or /gpu:0
 with tf.device(DEVICE):
     model = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR,
                               config=config)
+#-----------------------------------------------------------------------------------------------------------------
+with open('/content/Deteccion-Automatica-Pinturas/train/via_region_data.json') as file:
+    data = json.load(file)
+
+with open('/content/Deteccion-Automatica-Pinturas/val/via_region_data.json') as file:
+    data_val = json.load(file)
+
+def esta_train(cuadro):
+  train_dir =  '/content/Deteccion-Automatica-Pinturas/train/'
+  esta = False
+  for i in dataset_train.image_ids:
+    if dataset_train.image_reference(i) == train_dir + cuadro:
+      esta = True
+  return esta
+
+# Función para indicar el número de daños cogidos en un cuadro determinado
+# Entrada: Nombre del cuadro
+# Salida: Número de daños recogidos
+def Daños_cogidos(nombre_cuadro):
+  data_actual = data_val
+  if esta_train(nombre_cuadro):
+    data_actual = data
+  daños=0
+  for clave in data_actual:
+    if data_actual[clave]['filename'] == nombre_cuadro:
+      for clave2 in data_actual[clave]['regions']:
+        for clave3 in data_actual[clave]['regions'][clave2]['region_attributes']:
+          if clave3 == 'damage': 
+            daños+=1
+  
+  return daños
 
 #-----------------------------------------------------------------------------------------------------------------
 #Sprint 1 : Prueba: Mostrar por pantalla algunos cuadros con los daños obtenidos para ver el conjunto de datos que he recogido.
@@ -127,7 +158,10 @@ def Sprint2(ruta,cuadro):
   model.load_weights(weights_path, by_name=True)
 
   # Comprobamos la eficiencia del entrenamiento
-  train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
+  if esta_train(nombre_cuadro):
+          train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
+  else:
+          train_dir = '/content/Deteccion-Automatica-Pinturas/val/'
   #Primero mostramos el cuadro con los daños que hemos recogido
   image_id = 0
   for i in dataset_train.image_ids:
@@ -153,23 +187,7 @@ def Sprint2(ruta,cuadro):
   log("gt_bbox", gt_bbox)
   log("gt_mask", gt_mask)
 
-#-----------------------------------------------------------------------------------------------------------------
-with open('/content/Deteccion-Automatica-Pinturas/train/via_region_data.json') as file:
-    data = json.load(file)
-
-# Función para indicar el número de daños cogidos en un cuadro determinado
-# Entrada: Nombre del cuadro
-# Salida: Número de daños recogidos
-def Daños_cogidos(nombre_cuadro):
-  for clave in data:
-    if data[clave]['filename'] == nombre_cuadro:
-      daños=0
-      for clave2 in data[clave]['regions']:
-        daños+=1
-  
-  return daños
-  
-#-----------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------
 # Sprint 3: Prueba : Comparamos el número de daños obtenidos con el entrenamiento y el número de daños que hemos recogido de un cuadro dado,
 # si se obtiene el 90% del número de daños que hemos recogido el algoritmo está bien.
 def Sprint3(ruta,cuadro):
@@ -178,7 +196,10 @@ def Sprint3(ruta,cuadro):
   print("Loading weights ", weights_path)
   model.load_weights(weights_path, by_name=True)
 
-  train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
+  if esta_train(nombre_cuadro):
+        train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
+  else:
+        train_dir = '/content/Deteccion-Automatica-Pinturas/val/'
   #Primero mostramos el cuadro con los daños que hemos recogido
   image_id = 0
   for i in dataset_train.image_ids:
@@ -242,6 +263,56 @@ def Sprint3(ruta,cuadro):
   else:
     print("Buen entrenamiento!!!")
 
+#------------------------------------------------------------------------------------------------------
+# Sprint 4
+def Sprint4(nombre_cuadro):
+    # Cargamos el peso
+    weights_path = "/content/mask_rcnn_daño_0005 (7).h5"
+    print("Loading weights ", weights_path)
+    model.load_weights(weights_path, by_name=True)
+
+    # Vemos en que carpeta está
+    if esta_train(nombre_cuadro):
+          real_test_dir = '/content/Deteccion-Automatica-Pinturas/train/'
+    else:
+          real_test_dir = '/content/Deteccion-Automatica-Pinturas/val/'
+    
+    image_path = real_test_dir + nombre_cuadro
+
+    # Realizamos la predicción
+    imagen = skimage.io.imread(image_path)
+    img_arr = np.array(imagen)
+    results = model.detect([img_arr], verbose=1)
+    r = results[0]
+
+    #Obtenemos los poligonos
+    poligonos = miVisualize.PoligonosDaños(img, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names)
+
+    # Obtenemos las áreas que encontramos y la sumamos
+    areas_encontradas = []
+    for pl in poligonos:
+      poligono_encontrado = pl[1]
+      coordenadas_encontradas = poligono_encontrado.get_xy()
+      area_encontrada = abs(AreaPol(coordenadas_encontradas))
+      areas_encontradas.append(area_encontrada)
+
+    suma_areas = 0
+    for i in areas_encontradas:
+      suma_areas += i
+
+    tamaño = imagen.shape[0]*imagen.shape[1]
+    zona_no_dañada = tamaño - suma_areas
+    zona_dañada = tamaño - zona_no_dañada
+    porcentaje = (zona_dañada * 100)/tamaño
+
+
+    print("Tamaño del cuadro:", tamaño)
+    print("Suma de las áreas que hemos encontrados:",suma_areas)
+    print("Zona no dañada:",zona_no_dañada)
+    print("Zona dañada:",zona_dañada)
+    print("Porcentaje de daño que presenta el cuadro:",porcentaje,"%")
+      
+
 ############################################################
 #  Sprines
 ############################################################
@@ -269,6 +340,8 @@ if __name__ == '__main__':
         assert args.cuadro,"Argumento --cuadro es requerido para ejecutar este sprint"
     elif args.command == "sprint3":
         assert args.cuadro,"Argumento --cuadro es requerido para ejecutar este sprint"
+    elif args.command == "sprint4":
+        assert args.cuadro,"Argumento --cuadro es requerido para ejecutar este sprint"
 
     print("Sprint: ", args.command)
     print("Dataset: ", args.cuadro)
@@ -285,6 +358,8 @@ if __name__ == '__main__':
       Sprint2(ruta,args.cuadro)
     elif args.command == "sprint3":
       Sprint3(ruta,args.cuadro)
+    elif args.command == "sprint4":
+          Sprint4(args.cuadro)
 
 
 
