@@ -180,7 +180,7 @@ def Sprint2(ruta,cuadro):
   model.load_weights(weights_path, by_name=True)
 
   # Comprobamos la eficiencia del entrenamiento
-  if esta_train(nombre_cuadro):
+  if esta_train(cuadro):
           train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
   else:
           train_dir = '/content/Deteccion-Automatica-Pinturas/val/'
@@ -218,7 +218,7 @@ def Sprint3(ruta,cuadro):
   print("Loading weights ", weights_path)
   model.load_weights(weights_path, by_name=True)
 
-  if esta_train(nombre_cuadro):
+  if esta_train(cuadro):
         train_dir = '/content/Deteccion-Automatica-Pinturas/train/'
   else:
         train_dir = '/content/Deteccion-Automatica-Pinturas/val/'
@@ -308,7 +308,7 @@ def Sprint4(nombre_cuadro):
     r = results[0]
 
     #Obtenemos los poligonos
-    poligonos = miVisualize.PoligonosDaños(img, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names)
+    poligonos = miVisualize.PoligonosDaños(imagen, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names)
 
     # Obtenemos las áreas que encontramos y la sumamos
     areas_encontradas = []
