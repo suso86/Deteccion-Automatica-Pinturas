@@ -29,16 +29,18 @@ import IPython.display
 
 from Mask_RCNN.mrcnn import utils
 
+"""
 # Para localhost
 ROOT_DIR = os.path.abspath("C:/Users/jesus/Desktop/cosas_TFG/aplicacion/")
 ROOT_DIR = ROOT_DIR.replace('/',chr(92))
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
-
 """
+
+
 #Para google colab
 MODEL_DIR = "/content"
 DAÑO_DIR = "/content/Deteccion-Automatica-Pinturas"
-"""
+
 ###################################################################################################
 # Funciones de MASK-RCNN
 def random_colors(N, bright=True):
@@ -411,16 +413,16 @@ def guardarImagenDaños(nombre_img):
     print("Loading weights ", weights_path)
     model.load_weights(weights_path, by_name=True)
 
-    carpeta_imagenes = "C:/Users/jesus/Desktop/cosas_TFG/aplicacion/static/images/"
+    carpeta_imagenes = "/content/static/images"
     image_path =  os.path.join(carpeta_imagenes, nombre_img)
-    image_path = image_path.replace('/',chr(92))
+
     #for image_path in image_paths:
     img = skimage.io.imread(image_path)
     img_arr = np.array(img)
     results = model.detect([img_arr], verbose=1)
     r = results[0]
 
-    guardarImagen(img, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names, 
+    guardarImagenColab(img, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names, 
                                 r['scores'], title="Predicción")
 
 ###############################################################################################################
