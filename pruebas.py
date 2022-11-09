@@ -308,7 +308,7 @@ def Sprint4(ruta,nombre_cuadro):
     r = results[0]
 
     #Guardamos la imagen
-    miVisualize.saveImage(ruta, "lienzo_daños.jpg", img, r['rois'], r['masks'], r['class_ids'], 
+    miVisualize.saveImage(ruta, "lienzo_daños.jpg", imagen, r['rois'], r['masks'], r['class_ids'], 
                           dataset_train.class_names,
                           title="Predicción",figsize=(10,10))
 
