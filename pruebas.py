@@ -287,7 +287,7 @@ def Sprint3(ruta,cuadro):
 
 #------------------------------------------------------------------------------------------------------
 # Sprint 4
-def Sprint4(nombre_cuadro):
+def Sprint4(ruta,nombre_cuadro):
     # Cargamos el peso
     weights_path = "/content/mask_rcnn_daño_0005 (7).h5"
     print("Loading weights ", weights_path)
@@ -307,6 +307,11 @@ def Sprint4(nombre_cuadro):
     results = model.detect([img_arr], verbose=1)
     r = results[0]
 
+    #Guardamos la imagen
+    miVisualize.saveImage(ruta, "lienzo_daños.jpg", img, r['rois'], r['masks'], r['class_ids'], 
+                          dataset_train.class_names,
+                          title="Predicción",figsize=(10,10))
+
     #Obtenemos los poligonos
     poligonos = miVisualize.PoligonosDaños(imagen, r['rois'], r['masks'], r['class_ids'],dataset_train.class_names)
 
@@ -325,13 +330,12 @@ def Sprint4(nombre_cuadro):
     tamaño = imagen.shape[0]*imagen.shape[1]
     zona_no_dañada = tamaño - suma_areas
     zona_dañada = tamaño - zona_no_dañada
-    porcentaje = (zona_dañada * 100)/tamaño
+    porcentaje = round((zona_dañada * 100)/tamaño,2)
 
 
-    print("Tamaño del cuadro:", tamaño)
-    print("Suma de las áreas que hemos encontrados:",suma_areas)
-    print("Zona no dañada:",zona_no_dañada)
-    print("Zona dañada:",zona_dañada)
+    print("Área del lienzo:", tamaño)
+    print("Área dañada:",suma_areas)
+    print("Área no dañada:",zona_no_dañada)
     print("Porcentaje de daño que presenta el cuadro:",porcentaje,"%")
       
 
@@ -381,7 +385,7 @@ if __name__ == '__main__':
     elif args.command == "sprint3":
       Sprint3(ruta,args.cuadro)
     elif args.command == "sprint4":
-      Sprint4(args.cuadro)
+      Sprint4(ruta,args.cuadro)
 
 
 
