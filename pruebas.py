@@ -214,7 +214,7 @@ def Sprint2(ruta,cuadro):
 # si se obtiene el 90% del número de daños que hemos recogido el algoritmo está bien.
 def Sprint3(ruta,cuadro):
   # Cargamos el peso
-  weights_path = "/content/mask_rcnn_daño_0005 (7).h5"
+  weights_path = "/content/mask_rcnn_daño_0010.h5"
   print("Loading weights ", weights_path)
   model.load_weights(weights_path, by_name=True)
 
