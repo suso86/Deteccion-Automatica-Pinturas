@@ -333,9 +333,9 @@ def Sprint4(ruta,nombre_cuadro):
     porcentaje = round((zona_dañada * 100)/tamaño,2)
 
 
-    print("Área del lienzo:", tamaño)
-    print("Área dañada:",suma_areas)
-    print("Área no dañada:",zona_no_dañada)
+    print("Área del lienzo:", tamaño , "píxeles^2")
+    print("Área dañada:",suma_areas , "píxeles^2")
+    print("Área no dañada:",zona_no_dañada ,"píxeles^2")
     print("Porcentaje de daño que presenta el cuadro:",porcentaje,"%")
       
 
